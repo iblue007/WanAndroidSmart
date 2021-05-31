@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.baselib.base.BasePresenter
 import com.example.wanandroidsmart.http.HttpDefaultObserver
 import com.example.wanandroidsmart.http.RetrofitHelper
+import com.zs.wanandroid.entity.ArticleEntity
 import com.zs.wanandroid.entity.BannerEntity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -13,7 +14,35 @@ class HomePresenter(view: HomeContract.View) : BasePresenter<HomeContract.View>(
     HomeContract.Present<HomeContract.View> {
 
     override fun loadData(pageNum: Int) {
+        RetrofitHelper.getApiService().getHomeList(pageNum)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : HttpDefaultObserver<ArticleEntity>() {
+                override fun disposable(d: Disposable) {
+                    addSubscribe(d)
+                }
 
+                override fun onSuccess(t: ArticleEntity) {
+
+                    t.datas?.let {
+                        view?.showList(it)
+                    }
+//                    if (pageNum == 0) {
+//                        t.datas?.let {
+//                            load
+//                        }
+//                    } else {
+//                        t.datas?.let {
+//                            view?.showList(it)
+//                        }
+//                    }
+                }
+
+                override fun onError(errorMsg: String) {
+
+                }
+
+            })
     }
 
     override fun loadBanner() {

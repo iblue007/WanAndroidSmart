@@ -4,9 +4,11 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
+import androidx.recyclerview.widget.LinearLayoutManager
 import cn.bingoogolapple.bgabanner.BGABanner
 import com.example.baselib.util.ToastUtils
 import com.example.wanandroidsmart.R
+import com.example.wanandroidsmart.adapter.ArticleAdapter
 import com.example.wanandroidsmart.base.AppLazyFragment
 import com.zs.wanandroid.entity.ArticleEntity
 import com.zs.wanandroid.entity.BannerEntity
@@ -18,6 +20,8 @@ class HomeFragment : AppLazyFragment<HomeContract.Present<HomeContract.View>>(),
 
 
     private var bannerList = mutableListOf<BannerEntity>()
+    private var articleList = mutableListOf<ArticleEntity.DatasBean>()
+    private var articleAdapter: ArticleAdapter? = null
     override fun lazyInt() {
         initView()
         //   loadingTip.loading()
@@ -30,11 +34,20 @@ class HomeFragment : AppLazyFragment<HomeContract.Present<HomeContract.View>>(),
             llRadius.elevation = 20f
             rvHomeList.isNestedScrollingEnabled = false
         }
+        articleAdapter = ArticleAdapter(articleList)
+        articleAdapter?.setNewData(articleList)
+        rvHomeList.adapter = articleAdapter
+        rvHomeList.layoutManager = LinearLayoutManager(context)
 
     }
 
     private fun loadData() {
-        presenter?.loadBanner()
+        if (bannerList.size == 0) {
+            presenter?.loadBanner()
+        }
+        articleList.clear()
+        articleAdapter?.setNewData(articleList)
+        presenter?.loadData(1)
     }
 
     override fun createPresenter(): HomeContract.Present<HomeContract.View>? {
@@ -46,7 +59,14 @@ class HomeFragment : AppLazyFragment<HomeContract.Present<HomeContract.View>>(),
     }
 
     override fun showList(list: MutableList<ArticleEntity.DatasBean>) {
+        if (list.isNotEmpty()) {
+            articleList.addAll(list)
+            articleAdapter?.setNewData(articleList)
+        } else {
+            if (articleList.size == 0) {
 
+            }
+        }
     }
 
     override fun showBanner(bannerList: MutableList<BannerEntity>) {
